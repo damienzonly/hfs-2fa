@@ -5,8 +5,8 @@ exports.frontend_js = ['main.js']
 
 exports.init = async api => {
     const { getCurrentUsername } = api.require('./auth')
-    const se = require('speakeasy')
-    const qr = require('qrcode')
+    const se = require('./speakeasy')
+    const qr = require('./qrcode')
     const db = await api.openDb('2fa')
 
     api.events.on('finalizingLogin', async ({ ctx, username, inputs}) => {
