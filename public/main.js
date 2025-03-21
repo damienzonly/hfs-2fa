@@ -2,13 +2,7 @@
     const { h, Btn} = HFS;
     const { useState, useEffect } = HFS.React;
 
-    HFS.onEvent('appendMenuBar', () => h(Btn, {
-        icon: 'key',
-        label: '2FA',
-        onClick: () => {
-            HFS.dialogLib.newDialog({ title: '2FA', Content: Dialog2FA })
-        }
-    }))
+    HFS.onEvent('userPanelAfterInfo', () => h(Dialog2FA))
 
     HFS.onEvent('beforeLoginSubmit', () => h(OTPInput))
 
@@ -53,40 +47,41 @@
                 })
             }
         })
-        const components = [
-            h('h5', null, `2FA is ${secret ? 'enabled' : 'disabled'}`),
-            secret ? h('p', null, `Note: The QR scan is needed only once`) : null,
-            secret ? h('p', null, `Scan the following QR in your authenticator app`) : null,
-            secret ? h('img', { src: secret.qr }) : null,
-            secret ? h('p', null, 'Or manually:') : null,
-            secret ? h('p', null, secret.base32) : null,
-            secretButton
-        ]
-        return h('div', { className: 'dialog', style: styles.dialog2faWrapper }, null,
-           ...components.filter(Boolean)
+        return h('div', { className: 'dialog', style: styles.dialog2faWrapper },
+            h('div', { style: { display: 'flex', alignItems: 'center' } },
+                h('b', null, `2FA is ${secret ? 'enabled' : 'disabled'}`),
+                secretButton,
+            ),
+            secret && h('div', { style: { textAlign: 'center' }},
+                h('div', null, `Note: The QR scan is needed only once`),
+                h('div', null, `Scan the following QR in your authenticator app`),
+                h('img', { src: secret.qr }),
+                h('div', { style: { wordBreak: 'break-all' } }, 'Or manually: ', secret.base32),
+            ),
+
         )
     }
-}
 
-const styles = {
-    dialog2faWrapper: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    button: {
-        marginTop: '1em'
+
+    const styles = {
+        dialog2faWrapper: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        button: {
+            marginLeft: '1em'
+        }
     }
-}
 
-function getSecret() {
-    return fetch('/~/api/2fa/getSecret', {method: 'POST'}).then(r => r.json()).catch(() => null)
-}
-function createSecret() {
-    return fetch('/~/api/2fa/createSecret', {method: 'POST'}).then(r => r.json()).catch(() => null)
-}
-
-function deleteSecret() {
-    return fetch('/~/api/2fa/deleteSecret', {method: 'POST'}).then(r => r.json()).catch(() => null)
+    function getSecret() {
+        return HFS.customRestCall('getSecret').catch(() => null)
+    }
+    function createSecret() {
+        return HFS.customRestCall('createSecret').catch(() => null)
+    }
+    function deleteSecret() {
+        return HFS.customRestCall('deleteSecret').catch(() => null)
+    }
 }
