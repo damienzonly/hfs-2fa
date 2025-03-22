@@ -3,6 +3,13 @@ exports.description = 'HFS 2FA Plugin'
 exports.apiRequired = 12.1 // Btn
 exports.frontend_js = ['main.js']
 
+exports.config = {
+    issuer: {
+        type: 'string',
+        label: 'Issuer',
+    }
+}
+
 exports.init = async api => {
     const { getCurrentUsername } = api.require('./auth')
     const se = require('./speakeasy')
@@ -44,11 +51,12 @@ exports.init = async api => {
                 return {}
             },
             async getSecret({}, ctx) {
+                const issuer = api.getConfig('issuer') || api.getHfsConfig('base_url') || ctx.host || 'HFS'
                 const u = getCurrentUsername(ctx) || null
                 if (!u) throw 'not logged in'
                 const existing = await db.get(u)
                 if (!existing) throw 'secret does not exist'
-                return {...existing, qr: await qr.toDataURL(existing.otpauth_url)}
+                return {...existing, qr: await qr.toDataURL(`${existing.otpauth_url}&issuer='${issuer}'`)}
             },
         }
     }
