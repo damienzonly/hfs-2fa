@@ -10,4 +10,4 @@ To enable it, click on the top left user icon.
 
 ![](https://github.com/user-attachments/assets/e4f4ea64-ac6a-4274-84ea-9a1078c5f99f)
 
-![](https://github.com/user-attachments/assets/c7514e29-eaf2-4901-85d2-f8919d0cbc79)
+![](dist/preview.png)
