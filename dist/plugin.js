@@ -1,9 +1,12 @@
-exports.version = 1
+exports.version = 1.1
 exports.description = "Implements OTP 2FA authentication"
-exports.apiRequired = 12.1 // Btn
+exports.apiRequired = 13.4 // return for finalizingLogin
 exports.frontend_js = ['main.js']
 exports.repo = "damienzonly/hfs-2fa"
-exports.preview = ["https://github.com/user-attachments/assets/c7514e29-eaf2-4901-85d2-f8919d0cbc79","https://github.com/user-attachments/assets/89e0c41b-6a74-4c6a-becc-072517c72d97","https://github.com/user-attachments/assets/8edb44a7-7949-4242-8fa7-de18da0e48e4","https://github.com/user-attachments/assets/e4f4ea64-ac6a-4274-84ea-9a1078c5f99f"]
+exports.preview = ["https://github.com/user-attachments/assets/89e0c41b-6a74-4c6a-becc-072517c72d97","https://github.com/user-attachments/assets/8edb44a7-7949-4242-8fa7-de18da0e48e4","https://github.com/user-attachments/assets/e4f4ea64-ac6a-4274-84ea-9a1078c5f99f"]
+exports.changelog = [
+    { "version": 1.1, "message": "Fix: stopped working with HFS 3.2" }
+]
 
 exports.config = {
     issuer: {
@@ -20,18 +23,18 @@ exports.init = async api => {
     const db = await api.openDb('2fa')
 
     api.events.on('finalizingLogin', async ({ ctx, username, inputs}) => {
-        if (!username) throw 'not logged in'
+        if (!username) return "not logged in"
         const secret = await db.get(username)
         if (!secret) return
         const token = inputs.otp
-        if (!token) throw 'missing OTP'
+        if (!token) return "missing OTP"
         const verified = se.totp.verify({
             secret: secret.base32,
             encoding: 'base32',
             token,
             window: 1
         })
-        if (!verified) throw 'invalid OTP'
+        if (!verified) return "invalid OTP"
     })
 
     return {
